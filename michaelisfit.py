@@ -21,11 +21,11 @@ def main():
 
     # Model parameters
     Vmax = 100.0
-    Km = 3.0
-    stdev = 2.0
+    Km = 6.0
+    stdev = 5.0
 
     # Create the artificial dataset
-    nobs = int(50) # number of observations (data points)
+    nobs = int(10) # number of observations (data points)
     s_max= float(50) # maximum substrate concentration
     s = np.arange(nobs)*s_max/nobs # generate a range of substrate concentrations
                                    # evenly spaced from 0 to x_max
@@ -52,19 +52,43 @@ def main():
     import matplotlib.pyplot as plt
     plt.errorbar(s, v, yerr=sig, fmt = 'o', label='"data"')
     plt.plot(s, v_exp, label='fit')
+    plt.title("Michaelis-Menten Kinetics Fit")
+    plt.xlabel("[S]")
+    plt.ylabel("v")
     plt.legend()
     plt.axhline(y=0.0, color='0.75', linestyle='-')
     plt.axvline(x=0.0, color='0.75', linestyle='-')
     plt.show()
     
     # Double reciprocal - later need to enhance to add error bars and extend to x-int
-    import matplotlib.pyplot as plt
-    newsig=sig/v
-    plt.plot(1/s, 1/v,'bo',label='"data"')
-    plt.plot(1/s, 1/v_exp, label='fit')
+    # error bars added 6-26-18 DCH
+    # extend to int added 6-26-18 DCH
+    # also added -1/Km and 1/Vmax labels to double recip plot, x-axix and y-axis labels, and titles
+    
+    #plot line
+    x_int=-1/popt[1] # find 1/Km(calculated) for x-intercept values
+    xv=np.arange(500)/500*((1/(s[1])-x_int))+x_int
+    yv=1/(f(1/xv,popt[0],popt[1]))
+    plt.plot(xv, yv, label='fit')
+    plt.title("Lineweaver-Burke (Double Reciprocal) Plot")
+    plt.xlabel("1/[S]")
+    plt.ylabel("1/v")
+    
+    #plot points
+    newsig=sig/v/v
+    plt.errorbar(1/s, 1/v, yerr=newsig, fmt = 'o', label='"data"')
     plt.legend()
     plt.axhline(y=0.0, color='0.75', linestyle='-')
     plt.axvline(x=0.0, color='0.75', linestyle='-')
+    
+    #annotate Vmax and Km
+    plt.annotate("-1/Km", xy=(x_int,0), xytext=(x_int,0.4*1/popt[0]), 
+        horizontalalignment='center', verticalalignment='center',
+        arrowprops=dict(facecolor="black", width=1, shrink=0.1, headwidth=5))
+    plt.annotate("1/Vmax", xy=(0,1/popt[0]), xytext=(x_int/2.5,1.1/popt[0]), 
+        horizontalalignment='center', verticalalignment='center',
+        arrowprops=dict(facecolor="black", width=1, shrink=0.1, headwidth=5))
+    
     plt.show()
 
 ###########################################a                                    
